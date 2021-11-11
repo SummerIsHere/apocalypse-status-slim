@@ -11,6 +11,7 @@ See the [wiki](https://github.com/SummerIsHere/apocalypse-status/wiki) for more 
 
 1. Download and install the [Firefox web browser](https://www.mozilla.org/firefox/). Go to about About Firefox to check whether it is 32-bit or 64-bit. 64-bit recommended throughout this guide.
 2. Install the [Anaconda distribution](https://www.anaconda.com/download/) of Python3. When you install, be sure to include the installation of Anaconda Navigator.
+3. Open the Anaconda Navigator and install the pandas-datareader package.
 3. Install [PowerBI](https://www.powerbi.com), a program to create reports and data visualizations.  It is required to open "Apocalypse Status Board.pbix". This program is Windows only, so if you are on another system, use VirtualBox, Parallels, etc to launch a Windows environment)
 
 ## How to run

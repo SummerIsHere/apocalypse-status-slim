@@ -6,7 +6,7 @@
 
 import os, ftplib, pandas as pd, requests, logging, bs4, re, zipfile as zf
 from datetime import datetime, timedelta, date
-#from pandas_datareader import wb
+from pandas_datareader import wb
 
 ### Get CO2 Concentration Data Collected in Mauna Loa, Hawaii, USA from NOAA
 def get_CO2_conc(output_folder):
@@ -112,7 +112,6 @@ def get_iea_data(output_folder):
             continue
     raise Exception('Did not download any IEA data!')
 
-'''disable worldbank
 ### Download a single data set from the World Bank
 def get_wb_data(output_folder, indicator_id, indicator, country='WLD'):
     logging.info('Downloading World Bank data')
@@ -135,7 +134,6 @@ def get_wb_data(output_folder, indicator_id, indicator, country='WLD'):
     f = os.path.join(output_folder,'tidied_data_world_bank_' + indicator_id +'.csv')
     master.to_csv(f,index=False, encoding='utf-8')
     logging.info('Saved tidied World Bank data')
-'''
 
 ### Download grain data from USDA
 def get_grain_data(output_folder

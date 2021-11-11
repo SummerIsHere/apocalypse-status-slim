@@ -48,9 +48,8 @@ logging.info('Getting streamflow data')
 dtu.get_usgs_streamflow(sf_folder)
 logging.info('Getting global temperature data')
 dtu.get_global_temp_data(output_folder=data_folder)
-## World Bank Data is two years out of date, disable update and update file manually using worldometer.info
-#logging.info('Getting population data from World Bank')
-#dtu.get_wb_data(output_folder=data_folder, indicator_id='SP.POP.TOTL', indicator='Population, total', country='WLD')
+logging.info('Getting population data from World Bank')
+dtu.get_wb_data(output_folder=data_folder, indicator_id='SP.POP.TOTL', indicator='Population, total', country='WLD')
 logging.info('Getting grain data from USDA')
 dtu.get_grain_data(output_folder=data_folder
                   ,baseurl='https://apps.fas.usda.gov/psdonline/downloads/'
