@@ -2,7 +2,6 @@
 
 ### Main function to run the entire chain of downloading and extracting data
 
-
 import logging, os, download_tidy_up as dtu, sys#, pandas as pd
 
 ## Set up paths
@@ -41,10 +40,10 @@ logging.info('Getting CO2 Data')
 dtu.get_CO2_conc(output_folder=data_folder)
 logging.info('Getting NOAA US climate data')
 dtu.get_nClimDiv(output_folder=nClim_output_folder,raw_output_folder=nClim_raw_output_folder)
-#logging.info('Getting Snotel Data')
-#dtu.get_snotel_data(snotel_folder)
-#logging.info('Getting tidal gauge data')
-#dtu.get_tidal_data(tidal_folder)
+logging.info('Getting Snotel Data')
+dtu.get_snotel_data(snotel_folder)
+logging.info('Getting tidal gauge data')
+dtu.get_tidal_data(tidal_folder)
 logging.info('Getting streamflow data')
 dtu.get_usgs_streamflow(sf_folder)
 logging.info('Getting global temperature data')

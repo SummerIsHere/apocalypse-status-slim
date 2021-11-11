@@ -5,7 +5,7 @@
 
 
 import os, ftplib, pandas as pd, requests, logging, bs4, re, zipfile as zf
-from datetime import datetime #, timedelta, date
+from datetime import datetime, timedelta, date
 #from pandas_datareader import wb
 
 ### Get CO2 Concentration Data Collected in Mauna Loa, Hawaii, USA from NOAA
@@ -25,7 +25,7 @@ def get_global_temp_data(output_folder):
     logging.info('Downloading global temperature data from UK Met')
 
     ## Step 1: Download data file from UK Met
-    url = 'http://www.metoffice.gov.uk/hadobs/hadcrut4/data/current/time_series/HadCRUT.4.6.0.0.monthly_ns_avg.txt'
+    url = 'https://www.metoffice.gov.uk/hadobs/hadcrut4/data/current/time_series/HadCRUT.4.6.0.0.monthly_ns_avg.txt'
     raw_file = os.path.join(output_folder, 'HadCRUT.4.6.0.0.monthly_ns_avg.txt')
     pagey = requests.get(url)
     pagey.raise_for_status()
@@ -266,25 +266,23 @@ def get_tidal_data(tidal_folder):
     tidal_stations = pd.read_csv(os.path.join(tidal_folder, 'tidal_stations.csv'))
     for thisTS in tidal_stations.loc[:, 'NWLON Station ID']:
         logging.debug('Now on NWLON station ' + str(thisTS))
-        p1_STND = 'https://tidesandcurrents.noaa.gov/api/datagetter?product=monthly_mean&application=NOS.COOPS.TAC.WL&begin_date=19010101&end_date=21000101&time_zone=GMT&units=metric&format=csv&datum=STND&station='
-        p1_NAVD = 'https://tidesandcurrents.noaa.gov/api/datagetter?product=monthly_mean&application=NOS.COOPS.TAC.WL&begin_date=19010101&end_date=21000101&time_zone=GMT&units=metric&format=csv&datum=NAVD&station='
-
-        url_STND = p1_STND + str(thisTS)
-        raw_file_STND = os.path.join(tidal_folder, 'nwlon_station_id_' + str(thisTS) + '_datum_STND.csv')
-        pagey_STND = requests.get(url_STND)
-        pagey_STND.raise_for_status()
-        logging.info('Writing out ' + raw_file_STND)
-        open(raw_file_STND, 'w+').write(pagey_STND.text)
-
-        url_NAVD = p1_NAVD + str(thisTS)
-        raw_file_NAVD = os.path.join(tidal_folder, 'nwlon_station_id_' + str(thisTS) + '_datum_NAVD.csv')
-        pagey_NAVD = requests.get(url_NAVD)
-        pagey_NAVD.raise_for_status()
-        logging.info('Writing out ' + raw_file_NAVD)
-        open(raw_file_NAVD, 'w+').write(pagey_NAVD.text)
-
-        logging.debug('About to read NAVD file back in')
+        tehdate = date.today()
+        tehdate = tehdate.replace(day=1)
+        tehdate = tehdate - timedelta(days=1)
+        last_month_txt = tehdate.strftime("%Y%m%d")
+        p1_STND = 'https://tidesandcurrents.noaa.gov/api/datagetter?product=monthly_mean&application=NOS.COOPS.TAC.WL&begin_date=19500101&end_date=' + last_month_txt + '&time_zone=GMT&units=metric&format=csv&datum=STND&format=csv&station='
+        p1_NAVD = 'https://tidesandcurrents.noaa.gov/api/datagetter?product=monthly_mean&application=NOS.COOPS.TAC.WL&begin_date=19500101&end_date=' + last_month_txt + '&time_zone=GMT&units=metric&format=csv&datum=NAVD&format=csv&station='
+    
+        
         try:
+            url_NAVD = p1_NAVD + str(thisTS)
+            raw_file_NAVD = os.path.join(tidal_folder, 'nwlon_station_id_' + str(thisTS) + '_datum_NAVD.csv')
+            pagey_NAVD = requests.get(url_NAVD)
+            pagey_NAVD.raise_for_status()
+            logging.info('Writing out ' + raw_file_NAVD)
+            open(raw_file_NAVD, 'w+').write(pagey_NAVD.text)
+        
+            logging.debug('About to read NAVD file back in')
             tidy_nwlon_navd = pd.read_csv(raw_file_NAVD)
             tidy_nwlon_navd.columns = tidy_nwlon_navd.columns.str.strip()
             tidy_nwlon_navd.loc[:, 'Datum'] = 'NAVD'
@@ -298,8 +296,14 @@ def get_tidal_data(tidal_folder):
             logging.warning(str(e))
             logging.info(str(e.args))
             logging.warning('Moving on to STND file')
-
+    
         try:
+            url_STND = p1_STND + str(thisTS)
+            raw_file_STND = os.path.join(tidal_folder, 'nwlon_station_id_' + str(thisTS) + '_datum_STND.csv')
+            pagey_STND = requests.get(url_STND)
+            pagey_STND.raise_for_status()
+            logging.info('Writing out ' + raw_file_STND)
+            open(raw_file_STND, 'w+').write(pagey_STND.text)
             logging.debug('About to read STND file back in')
             tidy_nwlon_stnd = pd.read_csv(raw_file_STND)
             tidy_nwlon_stnd.columns = tidy_nwlon_stnd.columns.str.strip()
@@ -314,9 +318,10 @@ def get_tidal_data(tidal_folder):
             logging.warning(str(e))
             logging.info(str(e.args))
             logging.warning('Moving on to next tidal gauge station')
-
+    
     # Cycle through tidy tidal data
     fl = os.listdir(tidal_folder)
+    
     # Set up a regular expression for finding .csv files with the right station_id
     regex = re.compile(r'^tidied_data_nwlon_station_id_(.*)[.]csv$')
     fl = [m.group(0) for l in fl for m in [regex.match(l)] if m]

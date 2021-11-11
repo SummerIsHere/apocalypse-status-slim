@@ -59,7 +59,7 @@
 # Washington  SNOTEL Site - 3520 ft
 # Reporting Frequency: Daily; Date Range: Period of Record
 #
-# As of: Nov 10, 2021 7:15:01 PM GMT-08:00
+# As of: Nov 11, 2021 10:03:59 AM GMT-08:00
 #
 Date,Snow Water Equivalent (in) Start of Day Values,Snow Water Equivalent QC Flag Start of Day Values,Snow Water Equivalent QA Flag Start of Day Values,Snow Density (pct) Start of Day Values,Snow Density QC Flag Start of Day Values,Snow Density QA Flag Start of Day Values
 1984-10-01,0.0,V,,,,
@@ -13617,3 +13617,4 @@ Date,Snow Water Equivalent (in) Start of Day Values,Snow Water Equivalent QC Fla
 2021-11-08,1.3,V,,16.2,E,U
 2021-11-09,1.6,V,,22.9,V,U
 2021-11-10,1.9,V,,38.0,V,U
+2021-11-11,1.8,V,,36.0,V,U
