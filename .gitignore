@@ -112,3 +112,5 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+main_logging.txt
+main_stdout.txt

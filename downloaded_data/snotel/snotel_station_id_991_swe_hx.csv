@@ -1,0 +1,64 @@
+#------------------------------------------------- WARNING --------------------------------------------
+# 
+# The data you have obtained from this automated Natural Resources Conservation Service 
+# database are subject to revision regardless of indicated Quality Assurance level. 
+# Data are released on condition that neither the NRCS nor the United States Government 
+# may be held liable for any damages resulting from its use. 
+# 
+# SNOTEL air temperature data contains a known bias. This bias is rooted in the sensor 
+# conversion equation and varies through the output range. Solutions are in development. 
+# For more information go to Air Temperature Bias Correction. 
+# 
+# Help and Tutorials: https://www.nrcs.usda.gov/wps/portal/wcc/home/dataAccessHelp/helpCenters/reportGeneratorHelp/
+# Air Temperature Bias Correction: https://www.nrcs.usda.gov/wps/portal/wcc/home/snowClimateMonitoring/temperature/temperatureBiasCorrection/
+# 
+# Support Contact: usdafpacbc@servicenowservices.com
+# 
+#------------------------------------------------------------------------------------------------------
+# 
+# Reporting Frequency: Daily
+# Date Range: Period of Record
+# Report Instantaneous Data As: Start of Day
+#
+# Data for the following site(s) are contained in this file:
+#
+#	SNOTEL 991: Hozomeen Camp, WA
+# 
+# Data items provided in this file:
+#
+# Element Name           Value Type  Function Type  Function Duration             Base Data  Measurement Units  Sensor Depth  Element Code  Description                                                                                        
+# Snow Water Equivalent  Value       None           Instantaneous - Start of Day  N/A        Inches             N/A           WTEQ          Depth of water that would theoretically result if the entire snowpack were melted instantaneously  
+# Snow Water Equivalent  Qc flag     None           Instantaneous - Start of Day  N/A        Inches             N/A           WTEQ          Depth of water that would theoretically result if the entire snowpack were melted instantaneously  
+# Snow Water Equivalent  Qa flag     None           Instantaneous - Start of Day  N/A        Inches             N/A           WTEQ          Depth of water that would theoretically result if the entire snowpack were melted instantaneously  
+# Snow Density           Value       None           Instantaneous - Start of Day  N/A        Percent            N/A           SNDN          The mass of snow per unit volume, expressed as a percent of water content                          
+# Snow Density           Qc flag     None           Instantaneous - Start of Day  N/A        Percent            N/A           SNDN          The mass of snow per unit volume, expressed as a percent of water content                          
+# Snow Density           Qa flag     None           Instantaneous - Start of Day  N/A        Percent            N/A           SNDN          The mass of snow per unit volume, expressed as a percent of water content                          
+# 
+# Quality Control flags included:
+#
+# Flag    Name                Description
+#  V      Valid               Validated Data
+#  N      No Profile          No profile for automated validation
+#  E      Edit                Edit, minor adjustment for sensor noise
+#  B      Back Estimate       Regression-based estimate for homogenizing collocated Snow Course and Snow Pillow data sets
+#  K      Estimate            Estimate
+#  X      External Estimate   External estimate
+#  S      Suspect             Suspect data
+# 
+# Quality Assurance flags included:
+#
+# Flag    Name                Description
+#  U      Unknown             Unknown
+#  R      Raw                 No Human Review
+#  P      Provisional         Preliminary Human Review
+#  A      Approved            Processing and Final Review Completed
+# 
+#------------------------------------------------------------------------------------------------------
+# 
+# Hozomeen Camp (991) 
+# Washington  SNOTEL Site - 1690 ft
+# Reporting Frequency: Daily; Date Range: Period of Record
+#
+# As of: Nov 10, 2021 7:23:12 PM GMT-08:00
+#
+Date,Snow Water Equivalent (in) Start of Day Values,Snow Water Equivalent QC Flag Start of Day Values,Snow Water Equivalent QA Flag Start of Day Values,Snow Density (pct) Start of Day Values,Snow Density QC Flag Start of Day Values,Snow Density QA Flag Start of Day Values

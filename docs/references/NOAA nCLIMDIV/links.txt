@@ -1,0 +1,8 @@
+https://data.nodc.noaa.gov/cgi-bin/iso?id=gov.noaa.ncdc:C00005
+
+ftp://ftp.ncdc.noaa.gov/pub/data/cirs/climdiv/
+
+https://www.ncdc.noaa.gov/cag/divisional/time-series/4503/tavg/12/12/1895-2019?base_prd=true&firstbaseyear=1901&lastbaseyear=2000&trend=true&trend_base=10&firsttrendyear=1895&lasttrendyear=2019
+
+https://www.ncdc.noaa.gov/monitoring-references/maps/us-climate-divisions.php
+
