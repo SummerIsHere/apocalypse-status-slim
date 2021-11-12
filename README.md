@@ -5,7 +5,7 @@ Climate change and resource depletion are grave long-term dangers.
 The code in this repository will pull data from various public sources and display metrics showing how far those dangers are progressing. It also serves as an archive of minimally processed versions of that data. The metrics are displayed in the Power BI report in the report subfolder.
 
 ## Documentation
-See the [wiki](https://github.com/SummerIsHere/apocalypse-status/wiki) for more detailed documentation.
+See the [wiki](https://github.com/SummerIsHere/apocalypse-status-slim/wiki) for more detailed documentation.
 
 ## Installation Instructions
 
