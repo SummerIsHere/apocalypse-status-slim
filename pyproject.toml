@@ -1,0 +1,61 @@
+[build-system]
+requires = ["setuptools>=69", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "apocalypse-status"
+version = "0.1.0"
+description = "Climate/resource ETL pipeline with cross-platform HTML dashboard output"
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "GPL-3.0-or-later" }
+authors = [
+  { name = "Apocalypse Status contributors" }
+]
+dependencies = [
+  "pandas>=2.2,<3",
+  "requests>=2.32,<3",
+  "typer>=0.12,<1",
+  "pyyaml>=6.0,<7",
+  "plotly>=5.24,<6",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8.3,<9",
+  "mypy>=1.11,<2",
+  "ruff>=0.6,<1",
+  "pre-commit>=3.8,<4",
+]
+
+[project.scripts]
+apoc = "apocalypse_status.cli:app"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]
+addopts = "-ra"
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "W", "UP", "B", "SIM"]
+ignore = ["E501"]
+
+[tool.mypy]
+python_version = "3.11"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+no_implicit_optional = true
+check_untyped_defs = true
+plugins = []
+
