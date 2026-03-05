@@ -1,7 +1,7 @@
 # Apocalypse Status Dashboard (Modernized)
 
 ## Purpose
-This repository downloads climate and resource data, builds tidy and modeled datasets, and renders a single offline HTML dashboard that works on both macOS and Windows.
+Climate change and resource depletion are grave long-term dangers. This repository downloads climate and resource data, builds tidy and modeled datasets, and renders a single offline HTML dashboard. The datasets are also saved to this repo.
 
 The Power BI `.pbix` artifacts are kept for historical reference, but they are no longer required for normal use.
 
@@ -18,7 +18,7 @@ The Power BI `.pbix` artifacts are kept for historical reference, but they are n
 - Streamflow now supports provisional values by default and flags status at monthly level.
 
 ## Measures Tracked
-The dashboard keeps the original wiki intent, with a modernized pipeline:
+The dashboard keeps the original project intent, with a modernized pipeline:
 
 - Climate Change (global):
   - Atmospheric CO2 concentration (Mauna Loa, monthly).
@@ -35,27 +35,27 @@ The dashboard keeps the original wiki intent, with a modernized pipeline:
   - Grain per-capita trend (global supply relative to population).
 
 ## Threshold Context
-The HTML charts include practical reference lines aligned with the prior wiki framing:
+The HTML charts include practical reference lines aligned with prior project framing:
 
 - CO2:
   - `350 ppm`: commonly cited "safe line" context from James Hansen-style guidance.
-  - `415 ppm`: approximate Pliocene-era context threshold used in the historical wiki narrative.
+  - `415 ppm`: approximate Pliocene-era context threshold used in historical project narrative.
 - Global temperature anomaly:
   - Dashboard chart lines currently highlight `+1.5 C` and `+3.0 C` for near-term interpretability.
-  - The old wiki also documented higher warming scenario context (`~4 C`, Eocene-era analog references).
+  - Historical documentation also covered higher warming scenario context (`~4 C`, Eocene-era analog references).
 
-## Data Source Lineage (Wiki + Current Pipeline)
-Primary sources in the current code map to the prior wiki source list:
+## Data Source Lineage
+Primary sources in the current code map to prior project source lineage:
 
-- NOAA GML Mauna Loa CO2 (wiki `E`): [https://gml.noaa.gov/ccgg/trends/](https://gml.noaa.gov/ccgg/trends/)
-- Met Office HadCRUT (wiki `F`): [https://www.metoffice.gov.uk/hadobs/hadcrut5/](https://www.metoffice.gov.uk/hadobs/hadcrut5/)
-- EPA legacy CO2 composite context (wiki `H`): [https://www.epa.gov/sites/default/files/2016-08/ghg-concentrations_fig-1.csv](https://www.epa.gov/sites/default/files/2016-08/ghg-concentrations_fig-1.csv)
-- NOAA nClimDiv (wiki `I`): [https://www.ncei.noaa.gov/pub/data/cirs/climdiv/](https://www.ncei.noaa.gov/pub/data/cirs/climdiv/)
-- USDA NRCS SNOTEL (wiki `J`): [https://wcc.sc.egov.usda.gov/reportGenerator/](https://wcc.sc.egov.usda.gov/reportGenerator/)
-- USGS NWIS streamflow (wiki `K`): [https://waterdata.usgs.gov/nwis](https://waterdata.usgs.gov/nwis)
-- NOAA CO-OPS tide/sea level (wiki `L`): [https://tidesandcurrents.noaa.gov/](https://tidesandcurrents.noaa.gov/)
-- USDA PSD grain data (wiki `G`): [https://apps.fas.usda.gov/psdonline/app/index.html#/app/home](https://apps.fas.usda.gov/psdonline/app/index.html#/app/home)
-- World Bank population API (wiki `C` lineage): [https://data.worldbank.org/indicator/SP.POP.TOTL](https://data.worldbank.org/indicator/SP.POP.TOTL)
+- NOAA GML Mauna Loa CO2: [https://gml.noaa.gov/ccgg/trends/](https://gml.noaa.gov/ccgg/trends/)
+- Met Office HadCRUT: [https://www.metoffice.gov.uk/hadobs/hadcrut5/](https://www.metoffice.gov.uk/hadobs/hadcrut5/)
+- EPA legacy CO2 composite context: [https://www.epa.gov/sites/default/files/2016-08/ghg-concentrations_fig-1.csv](https://www.epa.gov/sites/default/files/2016-08/ghg-concentrations_fig-1.csv)
+- NOAA nClimDiv: [https://www.ncei.noaa.gov/pub/data/cirs/climdiv/](https://www.ncei.noaa.gov/pub/data/cirs/climdiv/)
+- USDA NRCS SNOTEL: [https://wcc.sc.egov.usda.gov/reportGenerator/](https://wcc.sc.egov.usda.gov/reportGenerator/)
+- USGS NWIS streamflow: [https://waterdata.usgs.gov/nwis](https://waterdata.usgs.gov/nwis)
+- NOAA CO-OPS tide/sea level: [https://tidesandcurrents.noaa.gov/](https://tidesandcurrents.noaa.gov/)
+- USDA PSD grain data: [https://apps.fas.usda.gov/psdonline/app/index.html#/app/home](https://apps.fas.usda.gov/psdonline/app/index.html#/app/home)
+- World Bank population API: [https://data.worldbank.org/indicator/SP.POP.TOTL](https://data.worldbank.org/indicator/SP.POP.TOTL)
 - US Census IDB population API (newer complement used by this pipeline): [https://api.census.gov/data/timeseries/idb/5year](https://api.census.gov/data/timeseries/idb/5year)
 
 ## Installation

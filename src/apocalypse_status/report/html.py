@@ -62,7 +62,7 @@ def _source_catalog(config: AppConfig) -> dict[str, list[SourceInfo]]:
                 name="EPA Historical CO2 Composite (legacy ice-core context)",
                 dataset_description=(
                     "Legacy historical CO2 context from an EPA composite of ice cores and stations "
-                    "used in the prior wiki-backed dashboard."
+                    "used in the prior dashboard."
                 ),
                 landing_url="https://www.epa.gov/climate-indicators/climate-change-indicators-atmospheric-concentrations-greenhouse-gases",
                 data_url="https://www.epa.gov/sites/default/files/2016-08/ghg-concentrations_fig-1.csv",

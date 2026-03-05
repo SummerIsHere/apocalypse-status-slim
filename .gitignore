@@ -122,6 +122,4 @@ main_stdout.txt
 .ruff_cache/
 
 # Generated run artifacts (can be regenerated)
-artifacts/run_manifest.json
-artifacts/baseline_metrics.json
-artifacts/apocalypse_status_dashboard.html
+artifacts/
