@@ -524,6 +524,27 @@ def _top_river_types(streamflow: pd.DataFrame, limit: int = 3) -> list[str]:
     return counts.sort_values(ascending=False).index.tolist()[:limit]
 
 
+def _river_names_for_type(streamflow: pd.DataFrame, river_type: str) -> list[str]:
+    if "River Type" not in streamflow.columns or "River Name" not in streamflow.columns:
+        return []
+    names = (
+        streamflow.loc[streamflow["River Type"] == river_type, "River Name"]
+        .dropna()
+        .astype(str)
+        .str.strip()
+    )
+    names = names[names != ""]
+    return sorted(set(names.tolist()))
+
+
+def _river_type_chart_title(river_type: str, river_names: list[str]) -> str:
+    if len(river_names) == 1:
+        return f"River Type: {river_type} ({river_names[0]})"
+    if river_names:
+        return f"River Type: {river_type}<br><sup>Included rivers: {', '.join(river_names)}</sup>"
+    return f"River Type: {river_type}"
+
+
 def _build_snowpack_views(
     monthly: pd.DataFrame,
     swe_col: str,
@@ -603,6 +624,57 @@ def _build_snowpack_views(
     ).mean()
 
     return prepared, profile, annual_peak, baseline_label, recent_label, month_labels
+
+
+def _restrict_to_complete_station_coverage(
+    source: pd.DataFrame,
+    value_col: str,
+) -> tuple[pd.DataFrame, str]:
+    if source.empty:
+        return source, "No station rows available."
+    if "Date" not in source.columns or value_col not in source.columns:
+        return source, "Station-level coverage metadata unavailable; using all available rows."
+
+    station_col: str | None = None
+    if "snotel_station_id_norm" in source.columns:
+        station_col = "snotel_station_id_norm"
+    elif "snotel_station_id" in source.columns:
+        station_col = "snotel_station_id"
+    if station_col is None:
+        return source, "Station IDs unavailable; using all available rows."
+
+    working = source.copy()
+    working["Date"] = pd.to_datetime(working["Date"], errors="coerce").dt.to_period("M").dt.to_timestamp("M")
+    working["_station_key"] = (
+        working[station_col]
+        .astype(str)
+        .str.strip()
+        .str.replace(r"\.0+$", "", regex=True)
+    )
+    working = working.dropna(subset=["Date", value_col, "_station_key"])
+    if working.empty:
+        return source, "No valid station rows after cleaning; using all available rows."
+
+    min_date = working["Date"].min()
+    max_date = working["Date"].max()
+    expected_dates = pd.date_range(start=min_date, end=max_date, freq="ME")
+    expected_count = int(len(expected_dates))
+    station_counts = working.groupby("_station_key")["Date"].nunique()
+    total_stations = int(station_counts.size)
+    complete_keys = set(station_counts[station_counts == expected_count].index.tolist())
+    if not complete_keys:
+        return source, (
+            "No stations have complete monthly coverage across the plotted span; using all available rows."
+        )
+
+    filtered = working[working["_station_key"].isin(complete_keys)].copy().drop(columns=["_station_key"])
+    kept_stations = len(complete_keys)
+    span_label = f"{min_date:%Y-%m} to {max_date:%Y-%m}"
+    note = (
+        f"Only stations with complete monthly coverage from {span_label} are included "
+        f"({kept_stations} of {total_stations} stations)."
+    )
+    return filtered, note
 
 
 def _load_snotel_region_groups(config: AppConfig) -> pd.DataFrame:
@@ -857,18 +929,24 @@ def build_sections(config: AppConfig, datasets: dict[str, pd.DataFrame]) -> list
             ],
         )
 
+        seasonal_precip_cols = {
+            "Spring Precipitation Inches": "Spring",
+            "Summer Precipitation Inches": "Summer",
+            "Fall Precipitation Inches": "Fall",
+            "Winter Precipitation Inches": "Winter",
+        }
+        wa_precip_annual = wa_precip[["Precip YearDate", *seasonal_precip_cols.keys()]].rename(columns=seasonal_precip_cols)
         fig7 = px.area(
-            wa_precip,
+            wa_precip_annual,
             x="Precip YearDate",
-            y=[
-                "Spring Precipitation Inches",
-                "Summer Precipitation Inches",
-                "Fall Precipitation Inches",
-                "Winter Precipitation Inches",
-            ],
+            y=list(seasonal_precip_cols.values()),
             title="PS Annual Precipitation",
         )
-        fig7.update_layout(template="plotly_white")
+        fig7.update_layout(
+            template="plotly_white",
+            yaxis_title="Precipitation (inches)",
+            legend_title_text="Season",
+        )
         add_section(
             "Puget Sound Annual Precipitation",
             "Seasonal precipitation totals.",
@@ -896,7 +974,7 @@ def build_sections(config: AppConfig, datasets: dict[str, pd.DataFrame]) -> list
         fig9.update_layout(template="plotly_white")
         add_section(
             "Puget Sound Degree Days",
-            "Annual heating/cooling degree day trends.",
+            "Heating degree days (HDD) estimate heating demand when temperatures are below 65F; cooling degree days (CDD) estimate cooling demand when temperatures are above 65F.",
             [fig8, fig9],
             "ps-dd",
             source_keys=["nclimdiv"],
@@ -937,6 +1015,7 @@ def build_sections(config: AppConfig, datasets: dict[str, pd.DataFrame]) -> list
             snow["Date"] = snow["Date"].dt.to_period("M").dt.to_timestamp("M")
             puget_only = snow[snow["snotel_region_group"] == "Puget Sound"].copy()
             monthly_source = puget_only if not puget_only.empty else snow
+            monthly_source, coverage_note = _restrict_to_complete_station_coverage(monthly_source, col)
             monthly = (
                 monthly_source.groupby("Date", as_index=False)[col]
                 .mean()
@@ -972,6 +1051,7 @@ def build_sections(config: AppConfig, datasets: dict[str, pd.DataFrame]) -> list
             )
             fig12.update_layout(
                 template="plotly_white",
+                yaxis_title="Snow Water Equivalent (inches)",
                 legend=dict(orientation="h", yanchor="top", y=-0.22, xanchor="left", x=0.0),
                 margin=dict(l=30, r=20, t=50, b=90),
             )
@@ -988,7 +1068,11 @@ def build_sections(config: AppConfig, datasets: dict[str, pd.DataFrame]) -> list
             )
             add_section(
                 "Puget Sound Snowpack Rolling Means",
-                "Full-window trailing 5-year and 30-year SWE rolling means (absolute inches).",
+                (
+                    "Full-window trailing 5-year and 30-year rolling means of SWE "
+                    "(snow water equivalent, in inches). "
+                    f"{coverage_note}"
+                ),
                 [fig12],
                 "ps-snowpack-rolling",
                 source_keys=["snotel"],
@@ -1057,6 +1141,7 @@ def build_sections(config: AppConfig, datasets: dict[str, pd.DataFrame]) -> list
                 type_sf = sf_plot[sf_plot["River Type"] == river_type].copy()
                 if type_sf.empty:
                     continue
+                river_names = _river_names_for_type(type_sf, river_type)
                 fig_type = px.line(
                     type_sf,
                     x="Date",
@@ -1064,7 +1149,7 @@ def build_sections(config: AppConfig, datasets: dict[str, pd.DataFrame]) -> list
                     color="data_status",
                     line_group="site_no",
                     hover_data=["site_no", "River Name", "River Type", "month_completeness"],
-                    title=f"River Type: {river_type}",
+                    title=_river_type_chart_title(river_type, river_names),
                 )
                 fig_type.update_layout(template="plotly_white")
                 type_figs.append(fig_type)
@@ -1101,6 +1186,7 @@ def build_sections(config: AppConfig, datasets: dict[str, pd.DataFrame]) -> list
                 type_specific = type_plot[type_plot["River Type"] == river_type].copy()
                 if type_specific.empty:
                     continue
+                river_names = _river_names_for_type(delta, river_type)
                 fig_type_line = px.line(
                     type_specific,
                     x="Month",
@@ -1108,7 +1194,7 @@ def build_sections(config: AppConfig, datasets: dict[str, pd.DataFrame]) -> list
                     color="Period",
                     category_orders={"Month": month_labels},
                     markers=True,
-                    title=f"River Type: {river_type}",
+                    title=_river_type_chart_title(river_type, river_names),
                 )
                 fig_type_line.update_layout(template="plotly_white", yaxis_tickformat=".0%")
                 type_figs.append(fig_type_line)

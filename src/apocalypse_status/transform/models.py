@@ -989,18 +989,63 @@ def build_streamflow_master(config: AppConfig, streamflow_monthly: pd.DataFrame)
 
 
 def build_annual_avg_msl(config: AppConfig, tidal_master: pd.DataFrame) -> tuple[pd.DataFrame, dict[str, Path]]:
+    def _build_from_absolute_means(frame: pd.DataFrame) -> pd.DataFrame:
+        annual_abs = frame.groupby("Year", as_index=False)["MSL"].mean().rename(columns={"MSL": "Annual Avg MSL (m)"})
+        baseline_row = annual_abs[annual_abs["Year"] == 2000]
+        baseline = (
+            baseline_row["Annual Avg MSL (m)"].iloc[0]
+            if not baseline_row.empty
+            else annual_abs["Annual Avg MSL (m)"].mean()
+        )
+        annual_abs["Change in Mean Sea Level since 2000 (in)"] = (annual_abs["Annual Avg MSL (m)"] - baseline) * 39.3701
+        return annual_abs
+
     frame = tidal_master.copy()
     frame["Datum"] = frame["Datum"].astype(str)
     frame = frame[frame["Datum"] == "STND"].copy()
     frame["Year"] = pd.to_numeric(frame["Year"], errors="coerce")
     frame["MSL"] = pd.to_numeric(frame["MSL"], errors="coerce")
     frame = frame.dropna(subset=["Year", "MSL"])
+    frame["Year"] = frame["Year"].astype(int)
 
-    annual = frame.groupby("Year", as_index=False)["MSL"].mean().rename(columns={"MSL": "Annual Avg MSL (m)"})
-    baseline_row = annual[annual["Year"] == 2000]
-    baseline = baseline_row["Annual Avg MSL (m)"].iloc[0] if not baseline_row.empty else annual["Annual Avg MSL (m)"].mean()
+    station_col = "nwlon_station_id" if "nwlon_station_id" in frame.columns else None
+    if station_col is None:
+        annual = _build_from_absolute_means(frame)
+    else:
+        station_annual = (
+            frame.groupby([station_col, "Year"], as_index=False)["MSL"]
+            .mean()
+            .rename(columns={"MSL": "Station Annual Avg MSL (m)"})
+        )
+        station_baseline = (
+            station_annual[station_annual["Year"] == 2000][[station_col, "Station Annual Avg MSL (m)"]]
+            .rename(columns={"Station Annual Avg MSL (m)": "Station Baseline MSL 2000 (m)"})
+        )
+        if station_baseline.empty:
+            annual = _build_from_absolute_means(frame)
+        else:
+            station_relative = station_annual.merge(station_baseline, on=station_col, how="inner")
+            if station_relative.empty:
+                annual = _build_from_absolute_means(frame)
+            else:
+                station_relative["Change in Mean Sea Level since 2000 (in)"] = (
+                    station_relative["Station Annual Avg MSL (m)"] - station_relative["Station Baseline MSL 2000 (m)"]
+                ) * 39.3701
+                annual = (
+                    station_relative.groupby("Year", as_index=False)["Change in Mean Sea Level since 2000 (in)"]
+                    .mean()
+                    .sort_values("Year")
+                    .reset_index(drop=True)
+                )
+                # Reconstruct a comparable absolute level anchored to the mean station baseline.
+                baseline_anchor_m = station_baseline["Station Baseline MSL 2000 (m)"].mean()
+                annual["Annual Avg MSL (m)"] = baseline_anchor_m + (
+                    annual["Change in Mean Sea Level since 2000 (in)"] / 39.3701
+                )
+                annual = annual[["Year", "Annual Avg MSL (m)", "Change in Mean Sea Level since 2000 (in)"]]
 
-    annual["Change in Mean Sea Level since 2000 (in)"] = (annual["Annual Avg MSL (m)"] - baseline) * 39.3701
+    annual = annual.sort_values("Year").reset_index(drop=True)
+    annual["Year"] = annual["Year"].astype(int)
     annual["Year Date"] = pd.to_datetime(annual["Year"].astype(int).astype(str) + "-01-01")
 
     output = config.paths.tidy_dir / "models" / "annual_avg_msl_cf_stnd.csv"

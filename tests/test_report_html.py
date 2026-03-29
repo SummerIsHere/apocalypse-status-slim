@@ -9,6 +9,7 @@ from apocalypse_status.config import AppConfig, AppPaths
 from apocalypse_status.report.html import (
     _dataset_max_date,
     _load_snotel_region_groups,
+    _restrict_to_complete_station_coverage,
     _source_refresh_panel_html,
     generate_dashboard_html,
 )
@@ -189,6 +190,32 @@ def test_load_snotel_region_groups_prefers_wria_id(tmp_path: Path) -> None:
     assert grouped["4001"] == "Other WA"
 
 
+def test_restrict_to_complete_station_coverage_filters_incomplete_station() -> None:
+    value_col = "Snow Water Equivalent (in) Start of Day Values"
+    source = pd.DataFrame(
+        {
+            "Date": pd.to_datetime(
+                [
+                    "2000-01-01",
+                    "2000-02-01",
+                    "2000-03-01",
+                    "2000-01-01",
+                    "2000-03-01",
+                ]
+            ),
+            "snotel_station_id": [1011, 1011, 1011, 2001, 2001],
+            value_col: [10.0, 11.0, 12.0, 8.0, 7.5],
+        }
+    )
+
+    filtered, note = _restrict_to_complete_station_coverage(source, value_col)
+
+    assert filtered["snotel_station_id"].astype(str).str.replace(r"\.0+$", "", regex=True).nunique() == 1
+    assert filtered["snotel_station_id"].astype(str).str.replace(r"\.0+$", "", regex=True).iloc[0] == "1011"
+    assert filtered["Date"].nunique() == 3
+    assert "1 of 2 stations" in note
+
+
 def test_generate_dashboard_html_streamflow_seasonality_section(tmp_path: Path) -> None:
     config = _config(tmp_path)
     rows: list[dict[str, object]] = []
@@ -225,8 +252,8 @@ def test_generate_dashboard_html_streamflow_seasonality_section(tmp_path: Path) 
 
     html = result.read_text(encoding="utf-8")
     assert "Seasonal Hydrograph Shape by river type." in html
-    assert "River Type: Snow dominant" in html
-    assert "River Type: Rain dominant" in html
+    assert "River Type: Snow dominant (Skagit)" in html
+    assert "River Type: Rain dominant (Chehalis)" in html
     assert "One-page 2x2 layout" not in html
     assert "streamflow-grid" in html
 
@@ -266,11 +293,62 @@ def test_generate_dashboard_html_streamflow_per_type_fallback_sections(tmp_path:
 
     html = result.read_text(encoding="utf-8")
     assert "River Streamflows" in html
-    assert "River Type: Snow dominant" in html
-    assert "River Type: Rain dominant" in html
+    assert "River Type: Snow dominant (Skagit)" in html
+    assert "River Type: Rain dominant (Chehalis)" in html
     assert "Seasonal Hydrograph Shape: unavailable" in html
     assert "One-page 2x2 layout" not in html
     assert "streamflow-grid" in html
+
+
+def test_generate_dashboard_html_streamflow_type_chart_lists_multiple_rivers(tmp_path: Path) -> None:
+    config = _config(tmp_path)
+    rows: list[dict[str, object]] = []
+    for year in range(2000, 2016):
+        for month in range(1, 13):
+            rows.append(
+                {
+                    "site_no": "12150800",
+                    "year_nu": year,
+                    "month_nu": month,
+                    "monthly_cfs": float(100 + month * 10 + (year - 2000)),
+                    "data_status": "approved",
+                    "River Name": "Skagit",
+                    "River Type": "Snow dominant",
+                    "month_completeness": 1.0,
+                }
+            )
+            rows.append(
+                {
+                    "site_no": "12167000",
+                    "year_nu": year,
+                    "month_nu": month,
+                    "monthly_cfs": float(90 + month * 9 + (year - 2000)),
+                    "data_status": "approved",
+                    "River Name": "Nooksack",
+                    "River Type": "Snow dominant",
+                    "month_completeness": 1.0,
+                }
+            )
+            rows.append(
+                {
+                    "site_no": "12201500",
+                    "year_nu": year,
+                    "month_nu": month,
+                    "monthly_cfs": float(70 + month * 8 + (year - 2000)),
+                    "data_status": "approved",
+                    "River Name": "Chehalis",
+                    "River Type": "Rain dominant",
+                    "month_completeness": 1.0,
+                }
+            )
+
+    datasets = {"streamflow_master": pd.DataFrame(rows)}
+    output = tmp_path / "artifacts" / "dashboard_streamflow_multi_rivers.html"
+    result = generate_dashboard_html(config, datasets, output)
+
+    html = result.read_text(encoding="utf-8")
+    assert "River Type: Snow dominant" in html
+    assert "Included rivers: Nooksack, Skagit" in html
 
 
 def test_generate_dashboard_html_precip_deviation_explains_fixed_baseline(tmp_path: Path) -> None:
