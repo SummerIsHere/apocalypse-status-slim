@@ -114,3 +114,12 @@ dmypy.json
 .pyre/
 main_logging.txt
 main_stdout.txt
+
+# Local OS/editor artifacts
+.DS_Store
+
+# Tool caches
+.ruff_cache/
+
+# Generated run artifacts (can be regenerated)
+artifacts/

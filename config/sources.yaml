@@ -1,0 +1,71 @@
+paths:
+  data_root: downloaded_data
+  raw_dir: downloaded_data/raw
+  tidy_dir: downloaded_data/tidy
+  artifacts_dir: artifacts
+
+sources:
+  co2:
+    enabled: true
+    url: https://gml.noaa.gov/webdata/ccgg/trends/co2/co2_mm_mlo.csv
+    raw_filename: co2_mm_mlo.csv
+  global_temp:
+    enabled: true
+    url: https://www.metoffice.gov.uk/hadobs/hadcrut5/data/HadCRUT.5.1.0.0/analysis/diagnostics/HadCRUT.5.1.0.0.analysis.summary_series.global.monthly.csv
+    raw_filename: HadCRUT.5.1.0.0.analysis.summary_series.global.monthly.csv
+  nclimdiv:
+    enabled: true
+    ftp_host: ftp.ncdc.noaa.gov
+    ftp_dir: pub/data/cirs/climdiv
+    metrics:
+      - climdiv-cddcdv
+      - climdiv-hddcdv
+      - climdiv-pcpndv
+      - climdiv-tmpcdv
+  snotel:
+    enabled: true
+    stations_csv: downloaded_data/snotel/WA_SNOTEL_STATION_LIST.csv
+    validate_ids_against_awdb: true
+    awdb_state_cd: WA
+    awdb_network_cd: SNTL
+    mirror_dir: downloaded_data/raw/snotel_mirror
+    mirror_prefer_first: false
+    mirror_max_age_days: 0
+    progress_log_every: 10
+  tidal:
+    enabled: true
+    stations_csv: downloaded_data/tide_gauge/tidal_stations.csv
+  streamflow:
+    enabled: true
+    stations_csv: downloaded_data/streamflow/streamflow_stations.csv
+    parameter_cd: "00060"
+    default_start_date: "1900-01-01"
+  world_bank:
+    enabled: true
+    indicator_id: SP.POP.TOTL
+    indicator: Population, total
+    country: WLD
+  population_census_idb:
+    enabled: true
+    url: https://api.census.gov/data/timeseries/idb/5year
+    raw_filename: census_idb_world_population.csv
+    start_year: 2000
+    end_year: 2100
+    include_projections: false
+    for_geography: "genc standard countries and areas:*"
+  grain:
+    enabled: true
+    url: https://apps.fas.usda.gov/psdonline/downloads/psd_grains_pulses_csv.zip
+    zip_member: psd_grains_pulses.csv
+
+quality:
+  stale_days_default: 45
+  duplicate_key_checks:
+    - dataset: tidy_data_master_usgs_streamflow
+      keys: [site_no, year_nu, month_nu]
+    - dataset: tidied_data_HadCRUT_global_temperature_anomalies
+      keys: [DateText]
+
+report:
+  title: Apocalypse Status Dashboard
+  subtitle: Cross-platform offline HTML snapshot
